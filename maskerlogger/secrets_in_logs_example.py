@@ -3,19 +3,17 @@ This module demonstrates handling secrets in logs with ox_formatter.
 """
 
 import logging
-from masker_formatter import MaskerFormatter
+from maskerlogger.masker_formatter import MaskerFormatter
 
 
 def main():
     """
     Main function to demonstrate logging with secrets.
     """
-    logger = logging.getLogger('oxlogger')
+    logger = logging.getLogger('mylogger')
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
-    handler.setFormatter(
-        MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s",
-                        regex_config_path="masker_logger/config/gitleaks.toml"))
+    handler.setFormatter(MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s"))
     logger.addHandler(handler)
 
     logger.info('"current_key": "AIzaSOHbouG6DDa6DOcRGEgOMayAXYXcw6la3c"')
