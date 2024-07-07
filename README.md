@@ -2,7 +2,7 @@
 
 # Masker Logger
 
-Keep Your logs safe!
+Keep Your logs safe!  
 This formatter ensures the security of your logs and prevents sensitive data leaks.
 For example -   
 Using this Formatter will print this line:   
