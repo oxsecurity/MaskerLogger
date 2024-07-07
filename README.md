@@ -1,3 +1,4 @@
+![MaskerLoggerTitle](https://github.com/oxsecurity/MaskerLogger/assets/140309297/ae8ec8a7-9ec8-42f6-9640-6f9cd91e986e)
 
 # Masker Logger
 
