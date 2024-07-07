@@ -20,7 +20,7 @@ pip install maskerlogger
 
  Like any formatter - just init your logger handler with the MaskerLogger formatter.  
  ```
- from ox_formatter import OxFormatter
+ from maskerlogger import MaskerFormatter
  logger = logging.getLogger('logger')
  logger.setLevel(logging.DEBUG)
  handler = logging.StreamHandler()
