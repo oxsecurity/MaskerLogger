@@ -13,7 +13,8 @@ def main():
     logger = logging.getLogger('mylogger')
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
-    handler.setFormatter(MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s"))
+    handler.setFormatter(
+        MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s"))
     logger.addHandler(handler)
 
     logger.info('"current_key": "AIzaSOHbouG6DDa6DOcRGEgOMayAXYXcw6la3c"')
