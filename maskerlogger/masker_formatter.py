@@ -1,9 +1,9 @@
 import logging
 import re
 from typing import List
-from ahocorasick_regex_match import RegexMatcher
+from maskerlogger.ahocorasick_regex_match import RegexMatcher
 
-DEFAULT_SECRETS_CONFIG_PATH = "masker_logger/config/gitleaks.toml"
+DEFAULT_SECRETS_CONFIG_PATH = "maskerlogger/config/gitleaks.toml"
 
 
 class MaskerFormatter(logging.Formatter):
