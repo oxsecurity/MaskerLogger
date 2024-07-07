@@ -3,11 +3,11 @@
 # Masker Logger
 
 Keep Your logs safe!
-
 This formatter ensures the security of your logs and prevents sensitive data leaks.
 For example -   
-Using this Formatter will print this line:   `looger.info(f'Dont Give Your {secrets} away')`  
-like this:  
+Using this Formatter will print this line:   
+`looger.info(f'Dont Give Your {secrets} away')`  
+like this:    
 `Dont Give Your ****** away`
 
 ## Getting started
