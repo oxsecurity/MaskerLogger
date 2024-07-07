@@ -2,13 +2,17 @@
 
 # Masker Logger
 
-The Best Logger Formatter to prevent leaks in you python logs!
+Keep Your logs safe!
+
+This formatter ensures the security of your logs and prevents sensitive data leaks.
+For example -   
+Using this Formatter will print this line:   `looger.info(f'Dont Give Your {secrets} away')`  
+like this:  
+`Dont Give Your ****** away`
 
 ## Getting started
-
-This formatter is based on the common `logging.Formatter` module.  
-For each record, before the log is printed (to any source - file/stdout/etc),  
-The formatter will prevent you from leaking sensetive data.
+This formatter utilizes the standard `logging.Formatter` module.  
+Before printing each record to any destination (file, stdout, etc.), it ensures sensitive data is masked with asterisks to prevent leaks.
 
 ### Install the library
 
@@ -29,10 +33,11 @@ pip install maskerlogger
  logger.addHandler(handler)
  ```
 ## The Config File
-Here all the magic happen!
-We based our tool on the great Gitleaks tool, and we are using their default config.  
-Default config can be found [here](https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml)
 
+Here's where the magic happens!  
+Our tool is built upon the powerful Gitleaks tool,  
+leveraging its default configuration to scan for sensitive data leaks in repositories.  
+You can find the default configuration [here](https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml)
 
 Good luck!
 
