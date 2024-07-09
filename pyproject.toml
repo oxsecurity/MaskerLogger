@@ -1,10 +1,14 @@
 [tool.poetry]
 name = "maskerlogger"
-version = "0.0.1"
-description = ""
+version = "0.1.0"
+description = "mask your secrets from your logs"
 authors = ["Tamar Galer <tamar@ox.security>"]
 readme = "README.md"
 packages = [{include = "maskerlogger"}]
+urls = { 
+    "Source" = "https://github.com/oxsecurity/MaskerLogger",
+    "Tracker" = "https://github.com/oxsecurity/MaskerLogger/issues"
+}
 
 [tool.poetry.dependencies]
 python = "^3.11"
