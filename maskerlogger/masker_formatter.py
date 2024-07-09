@@ -1,9 +1,11 @@
 import logging
 import re
 from typing import List
-from maskerlogger.ahocorasick_regex_match import RegexMatcher
+from ahocorasick_regex_match import RegexMatcher
 
 DEFAULT_SECRETS_CONFIG_PATH = "maskerlogger/config/gitleaks.toml"
+_APPLY_MASK = 'apply_mask'
+SKIP_MASK = {_APPLY_MASK: False}
 
 
 class MaskerFormatter(logging.Formatter):
@@ -15,7 +17,8 @@ class MaskerFormatter(logging.Formatter):
         self.regex_matcher = RegexMatcher(regex_config_path)
 
     def format(self, record: logging.LogRecord) -> str:
-        self._mask_sensitive_data(record)
+        if getattr(record, _APPLY_MASK, True):
+            self._mask_sensitive_data(record)
         return super().format(record)
 
     def _mask_secret(self, msg: str, matches: List[re.Match]) -> str:
