@@ -5,15 +5,14 @@ description = "mask your secrets from your logs"
 authors = ["Tamar Galer <tamar@ox.security>"]
 readme = "README.md"
 packages = [{include = "maskerlogger"}]
-urls = { 
-    "Source" = "https://github.com/oxsecurity/MaskerLogger",
-    "Tracker" = "https://github.com/oxsecurity/MaskerLogger/issues"
-}
 
 [tool.poetry.dependencies]
 python = "^3.11"
 pyahocorasick = "^2.1.0"
 
+[tool.poetry.urls]
+Source = "https://github.com/oxsecurity/MaskerLogger"
+Tracker = "https://github.com/oxsecurity/MaskerLogger/issues"
 
 [build-system]
 requires = ["poetry-core"]
