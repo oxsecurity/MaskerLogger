@@ -1,7 +1,7 @@
 import logging
 import re
 from typing import List
-from ahocorasick_regex_match import RegexMatcher
+from maskerlogger.ahocorasick_regex_match import RegexMatcher
 import os
 
 DEFAULT_SECRETS_CONFIG_PATH = os.path.join(
