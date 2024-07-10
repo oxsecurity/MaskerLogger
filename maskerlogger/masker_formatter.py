@@ -4,7 +4,8 @@ from typing import List
 from ahocorasick_regex_match import RegexMatcher
 import os
 
-DEFAULT_SECRETS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/gitleaks.toml")
+DEFAULT_SECRETS_CONFIG_PATH = os.path.join(
+    os.path.dirname(__file__), "config/gitleaks.toml")
 _APPLY_MASK = 'apply_mask'
 SKIP_MASK = {_APPLY_MASK: False}
 
