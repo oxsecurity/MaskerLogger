@@ -27,8 +27,15 @@ class RegexMatcher:
             for keyword in rule.get('keywords', []):
                 if keyword not in keyword_to_patterns:
                     keyword_to_patterns[keyword] = []
-                keyword_to_patterns[keyword].append(rule['regex'])
+                keyword_to_patterns[keyword].append(self._get_compiled_regex(
+                    rule['regex']))
         return keyword_to_patterns
+
+    def _get_compiled_regex(self, regex: str) -> str:
+        if '(?i)' in regex:
+            regex = regex.replace('(?i)', '')
+            return re.compile(regex, re.IGNORECASE)
+        return re.compile(regex)
 
     def _filter_by_keywords(self, line):
         matched_regexes = set()
@@ -36,10 +43,10 @@ class RegexMatcher:
             matched_regexes.update(regex_values)
         return matched_regexes
 
-    def _get_match_regex(self, line, matched_regex) -> List[re.Match]:
+    def _get_match_regex(self, line: str,
+                         matched_regex: List[re.Pattern]) -> List[re.Match]:
         matches = []
-        for pattern in matched_regex:
-            regex = re.compile(pattern)
+        for regex in matched_regex:
             if match := regex.search(line):
                 matches.append(match)
         return matches
