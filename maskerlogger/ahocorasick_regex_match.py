@@ -44,6 +44,7 @@ class RegexMatcher:
                 matches.append(match)
         return matches
 
-    def match_regex_to_line(self, line) -> re.Match:
-        if matched_regxes := self._filter_by_keywords(line):
+    def match_regex_to_line(self, line: str) -> re.Match:
+        lower_case_line = line.lower()
+        if matched_regxes := self._filter_by_keywords(lower_case_line):
             return self._get_match_regex(line, matched_regxes)

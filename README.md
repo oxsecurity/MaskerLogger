@@ -14,7 +14,7 @@ Keep Your logs safe!
 This formatter ensures the security of your logs and prevents sensitive data leaks.
 For example -   
 Using this Formatter will print this line:   
-`looger.info(f'Dont Give Your {secrets} away')`  
+`logger.info(f'Dont Give Your {secrets} away')`  
 like this:    
 `Dont Give Your ****** away`
 
@@ -46,7 +46,16 @@ If, for some reason, you want to disable masking on a specific log line, use the
 from masker_formatter import MaskerFormatter, SKIP_MASK
 ...
 ...
-logger.info('Line you want tp skip', extra=SKIP_MASK)
+logger.info('Line you want to skip', extra=SKIP_MASK)
+```
+
+#### fix len masking
+If you want the masking to be in a fixed size (and not in the secret len),  
+please set the `fix_masking_len`:  
+```
+handler.setFormatter(
+    MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s",
+                    fix_masking_len=30))
 ```
 
 ## The Config File

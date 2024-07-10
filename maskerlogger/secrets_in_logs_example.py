@@ -15,11 +15,11 @@ def main():
     handler = logging.StreamHandler()
     handler.setFormatter(
         MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s",
-                        regex_config_path="your/config/gitleaks.toml"))
+                        fix_masking_len=30))
     logger.addHandler(handler)
 
     logger.info('"current_key": "AIzaSOHbouG6DDa6DOcRGEgOMayAXYXcw6la3c"', extra=SKIP_MASK) # noqa
-    logger.info('AWS secret: "AKIAI44QH8DHBEXAMPLE" and then more text.')
+    logger.info('"AKIAI44QH8DHBEXAMPLE" and then more text.')
     logger.info("Datadog access token: 'abcdef1234567890abcdef1234567890'")
     logger.info('"password": "password123"')
 
