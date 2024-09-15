@@ -2,6 +2,10 @@ import tomllib
 import re
 from typing import List
 import ahocorasick
+from maskerlogger.utils import timeout
+
+
+MAX_MATCH_TIMEOUT = 1
 
 
 class RegexMatcher:
@@ -43,6 +47,7 @@ class RegexMatcher:
             matched_regexes.update(regex_values)
         return matched_regexes
 
+    @timeout(MAX_MATCH_TIMEOUT)
     def _get_match_regex(self, line: str,
                          matched_regex: List[re.Pattern]) -> List[re.Match]:
         matches = []
