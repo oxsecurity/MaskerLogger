@@ -49,14 +49,23 @@ from masker_formatter import MaskerFormatter, SKIP_MASK
 logger.info('Line you want to skip', extra=SKIP_MASK)
 ```
 
-#### fix len masking
-If you want the masking to be in a fixed size (and not in the secret len),  
-please set the `fix_masking_len`:  
+#### redact
+Here’s a rewritten version suitable for inclusion in a README.md file:
+
+---
+
+### Partial Masking of Secrets
+If you prefer to mask only a portion of a secret (rather than its entire length), you can set the `redact` parameter in the formatter. The `redact` parameter specifies the percentage of the secret to be masked.
+
+Here’s an example of how to use it:
+
 ```
 handler.setFormatter(
     MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s",
-                    fix_masking_len=30))
+                    redact=30))
 ```
+
+In this example, 30% of the secret will be masked. Adjust the `redact` value as needed to suit your requirements.
 
 ## The Config File
 

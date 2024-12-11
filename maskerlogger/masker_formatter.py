@@ -17,8 +17,13 @@ class MaskerFormatter(logging.Formatter):
                  redact=100):
         super().__init__(fmt, datefmt, style, validate=validate,
                          defaults=defaults)
-        self.redact = redact
+        self.redact = self._validate_redact(redact)
         self.regex_matcher = RegexMatcher(regex_config_path)
+
+    def _validate_redact(self, redact: int) -> int:
+        if not (0 <= int(redact) <= 100):
+            raise ValueError("Redact value must be between 0 and 100")
+        return int(redact)
 
     def format(self, record: logging.LogRecord) -> str:
         if getattr(record, _APPLY_MASK, True):
@@ -30,7 +35,8 @@ class MaskerFormatter(logging.Formatter):
             match_groups = match.groups() if match.groups() else [match.group()]  # noqa
             for group in match_groups:
                 redact_length = int((len(group) / 100) * self.redact)
-                msg = msg.replace(group[:redact_length], "*" * redact_length, 1)
+                msg = msg.replace(
+                    group[:redact_length], "*" * redact_length, 1)
             return msg
 
     def _mask_sensitive_data(self, record: logging.LogRecord) -> None:
