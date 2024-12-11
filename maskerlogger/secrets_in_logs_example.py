@@ -15,7 +15,7 @@ def main():
     handler = logging.StreamHandler()
     handler.setFormatter(
         MaskerFormatter("%(asctime)s %(name)s %(levelname)s %(message)s",
-                        fix_masking_len=30))
+                        redact=50))
     logger.addHandler(handler)
 
     logger.info('"current_key": "AIzaSOHbouG6DDa6DOcRGEgOMayAXYXcw6la3c"', extra=SKIP_MASK) # noqa
