@@ -20,19 +20,19 @@ class AbstractMaskedLogger(ABC):
             self,
             fmt: str,
             regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            fix_masking_len: int = -1
+            redact=100
     ):
         """Initializes the AbstractMaskedLogger.
 
         Args:
             fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
-            fix_masking_len (int): Fixed length for masking sensitive data, -1 for dynamic masking.
+            redact (int): Percentage of the sensitive data to redact.
         """
-        self.fix_masking_len = fix_masking_len
+        self.fmt = fmt
         self.regex_matcher = RegexMatcher(regex_config_path)
         self.formatter = None  # To be defined by concrete implementations
-        self.fmt = fmt
+        self.redact = self._validate_redact(redact)
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as text and applies masking."""
@@ -41,13 +41,21 @@ class AbstractMaskedLogger(ABC):
 
         return self.formatter.format(record)
 
+    @staticmethod
+    def _validate_redact(redact: int) -> int:
+        if not (0 <= int(redact) <= 100):
+            raise ValueError("Redact value must be between 0 and 100")
+
+        return int(redact)
+
     def _mask_secret(self, msg: str, matches: List[re.Match]) -> str:
         """Masks the sensitive data in the log message."""
         for match in matches:
             match_groups = match.groups() if match.groups() else [match.group()]  # noqa
             for group in match_groups:
-                replace_len = len(group) if self.fix_masking_len < 0 else self.fix_masking_len  # noqa
-                msg = msg.replace(group, "*" * replace_len)
+                redact_length = int((len(group) / 100) * self.redact)
+                msg = msg.replace(
+                    group[:redact_length], "*" * redact_length, 1)
 
         return msg
 
@@ -63,16 +71,16 @@ class MaskerFormatter(AbstractMaskedLogger):
             self,
             fmt: str,
             regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            fix_masking_len: int = -1
+            redact=100
     ):
         """Initializes the MaskerFormatter.
 
         Args:
             fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
-            fix_masking_len (int): Fixed length for masking sensitive data, -1 for dynamic masking.
+            redact (int): Percentage of the sensitive data to redact.
         """
-        super().__init__(fmt, regex_config_path, fix_masking_len)
+        super().__init__(fmt, regex_config_path, redact)
         self.formatter = logging.Formatter(fmt)
 
 
@@ -82,14 +90,14 @@ class MaskerFormatterJson(MaskerFormatter):
             self,
             fmt: str,
             regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            fix_masking_len: int = -1
+            redact = 100
     ):
         """Initializes the MaskerFormatterJson.
 
         Args:
             fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
-            fix_masking_len (int): Fixed length for masking sensitive data, -1 for dynamic masking.
+            redact (int): Percentage of the sensitive data to redact.
         """
-        super().__init__(fmt, regex_config_path, fix_masking_len)
+        super().__init__(fmt, regex_config_path, redact)
         self.formatter = jsonlogger.JsonFormatter(fmt)
