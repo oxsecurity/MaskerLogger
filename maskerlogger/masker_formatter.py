@@ -31,15 +31,14 @@ class AbstractMaskedLogger(ABC):
         """
         self.fmt = fmt
         self.regex_matcher = RegexMatcher(regex_config_path)
-        self.formatter = None  # To be defined by concrete implementations
-        self.redact = self._validate_redact(redact)
+        self.redact = redact
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as text and applies masking."""
         if getattr(record, _APPLY_MASK, True):
             self._mask_sensitive_data(record)
 
-        return self.formatter.format(record)
+        return self.fmt.format(record)
 
     @staticmethod
     def _validate_redact(redact: int) -> int:
