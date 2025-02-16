@@ -18,18 +18,15 @@ SKIP_MASK = {_APPLY_MASK: False}
 class AbstractMaskedLogger(ABC):
     def __init__(
             self,
-            fmt: str,
             regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
             redact=100
     ):
         """Initializes the AbstractMaskedLogger.
 
         Args:
-            fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
         """
-        self.fmt = fmt
         self.regex_matcher = RegexMatcher(regex_config_path)
         self.redact = redact
 
@@ -58,7 +55,7 @@ class AbstractMaskedLogger(ABC):
 
 
 # Normal Masked Logger - Text-Based Log Formatter
-class MaskerFormatter(AbstractMaskedLogger):
+class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
     def __init__(
             self,
             fmt: str,
@@ -72,19 +69,19 @@ class MaskerFormatter(AbstractMaskedLogger):
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
         """
-        super().__init__(fmt, regex_config_path, redact)
-        self.formatter = logging.Formatter(fmt)
+        logging.Formatter.__init__(self, fmt)
+        AbstractMaskedLogger.__init__(self, regex_config_path, redact)
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as text and applies masking."""
         if getattr(record, _APPLY_MASK, True):
             self._mask_sensitive_data(record)
 
-        return self.formatter.format(record)
+        return super().format(record)
 
 
 # JSON Masked Logger - JSON-Based Log Formatter
-class MaskerFormatterJson(MaskerFormatter):
+class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
     def __init__(
             self,
             fmt: str,
@@ -98,5 +95,12 @@ class MaskerFormatterJson(MaskerFormatter):
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
         """
-        super().__init__(fmt, regex_config_path, redact)
-        self.formatter = jsonlogger.JsonFormatter(fmt)
+        jsonlogger.JsonFormatter.__init__(self, fmt)
+        AbstractMaskedLogger.__init__(self, regex_config_path, redact)
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Formats the log record as JSON and applies masking."""
+        if getattr(record, _APPLY_MASK, True):
+            self._mask_sensitive_data(record)
+
+        return super().format(record)
