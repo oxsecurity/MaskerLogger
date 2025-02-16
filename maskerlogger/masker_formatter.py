@@ -89,7 +89,7 @@ class MaskerFormatterJson(MaskerFormatter):
             self,
             fmt: str,
             regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            redact = 100
+            redact=100
     ):
         """Initializes the MaskerFormatterJson.
 
