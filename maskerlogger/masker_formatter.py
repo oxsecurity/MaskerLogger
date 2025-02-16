@@ -33,13 +33,6 @@ class AbstractMaskedLogger(ABC):
         self.regex_matcher = RegexMatcher(regex_config_path)
         self.redact = redact
 
-    def format(self, record: logging.LogRecord) -> str:
-        """Formats the log record as text and applies masking."""
-        if getattr(record, _APPLY_MASK, True):
-            self._mask_sensitive_data(record)
-
-        return self.fmt.format(record)
-
     @staticmethod
     def _validate_redact(redact: int) -> int:
         if not (0 <= int(redact) <= 100):
@@ -81,6 +74,13 @@ class MaskerFormatter(AbstractMaskedLogger):
         """
         super().__init__(fmt, regex_config_path, redact)
         self.formatter = logging.Formatter(fmt)
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Formats the log record as text and applies masking."""
+        if getattr(record, _APPLY_MASK, True):
+            self._mask_sensitive_data(record)
+
+        return self.formatter.format(record)
 
 
 # JSON Masked Logger - JSON-Based Log Formatter
