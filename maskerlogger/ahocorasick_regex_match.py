@@ -1,4 +1,4 @@
-import tomllib
+import tomli as toml
 import re
 from typing import List
 import ahocorasick
@@ -21,9 +21,10 @@ class RegexMatcher:
         keyword_automaton.make_automaton()
         return keyword_automaton
 
-    def _load_config(self, config_path: str) -> dict:
+    @staticmethod
+    def _load_config(config_path: str) -> dict:
         with open(config_path, 'rb') as f:
-            return tomllib.load(f)
+            return toml.load(f)
 
     def _extract_keywords_and_patterns(self, config) -> dict:
         keyword_to_patterns = {}
@@ -31,8 +32,10 @@ class RegexMatcher:
             for keyword in rule.get('keywords', []):
                 if keyword not in keyword_to_patterns:
                     keyword_to_patterns[keyword] = []
+
                 keyword_to_patterns[keyword].append(self._get_compiled_regex(
                     rule['regex']))
+
         return keyword_to_patterns
 
     def _get_compiled_regex(self, regex: str) -> str:
