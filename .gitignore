@@ -32,3 +32,4 @@ env/
 venv/
 /site
 .idea/
+.DS_Store
