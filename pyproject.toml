@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "pyahocorasick>=2.1.0,<3.0.0",
-    "python-json-logger>=2.0.7,<3.0.0",
+    "python-json-logger>=2.0.7,<4.0.0",
     "tomli>=2.0.0,<3.0.0",
 ]
 

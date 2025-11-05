@@ -53,7 +53,7 @@ pip install maskerlogger
 #### skip masking
 If, for some reason, you want to disable masking on a specific log line, use the `SKIP_MASK` mechanism.
 ```
-from masker_formatter import MaskerFormatter, SKIP_MASK
+from maskerlogger import MaskerFormatter, SKIP_MASK
 ...
 ...
 logger.info('Line you want to skip', extra=SKIP_MASK)

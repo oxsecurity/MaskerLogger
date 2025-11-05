@@ -1,7 +1,7 @@
 """
-Init file for oxformatter package.
+Init file for maskerlogger package.
 """
 
-from maskerlogger.masker_formatter import MaskerFormatter, MaskerFormatterJson  # noqa
+from maskerlogger.masker_formatter import MaskerFormatter, MaskerFormatterJson, SKIP_MASK  # noqa
 
 __version__ = "1.0.0"

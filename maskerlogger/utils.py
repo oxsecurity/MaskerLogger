@@ -10,7 +10,7 @@ class TimeoutException(Exception):
     pass
 
 
-def timeout(seconds: int | Callable[..., int]) -> Callable[[F], F]:
+def timeout(seconds: int | float | Callable[..., int | float]) -> Callable[[F], F]:
     """
     Decorator to enforce a timeout on function execution.
 
@@ -24,7 +24,9 @@ def timeout(seconds: int | Callable[..., int]) -> Callable[[F], F]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result: list[Any] = [None]
             exception: list[Exception | None] = [None]
-            timeout_value = seconds(*args, **kwargs) if callable(seconds) else seconds
+            timeout_value: int | float = seconds(*args, **kwargs) if callable(seconds) else seconds
+            if timeout_value <= 0:
+                raise ValueError(f"Timeout value must be positive, got {timeout_value}")
 
             def target() -> None:
                 try:
@@ -32,10 +34,13 @@ def timeout(seconds: int | Callable[..., int]) -> Callable[[F], F]:
                 except Exception as e:
                     exception[0] = e
 
-            thread = threading.Thread(target=target, daemon=True)
+            thread = threading.Thread(
+                target=target, daemon=True, name=f"timeout-thread-{func.__name__}"
+            )
             thread.start()
-            thread.join(timeout_value)
+            thread.join(timeout=timeout_value)
             if thread.is_alive():
+                # Note: Daemon thread will be cleaned up by the OS when the main process exits
                 raise TimeoutException(f"Function call exceeded {timeout_value} seconds")
             if exception[0]:
                 raise exception[0]

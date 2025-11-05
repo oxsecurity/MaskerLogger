@@ -8,7 +8,24 @@ from maskerlogger.utils import timeout
 
 
 class RegexMatcher:
+    """Efficient regex matcher using Aho-Corasick algorithm for keyword detection.
+
+    This class loads regex patterns from a TOML configuration file and uses the
+    Aho-Corasick algorithm to efficiently detect keywords before applying regex matching.
+    This two-stage approach significantly improves performance for large pattern sets.
+    """
+
     def __init__(self, config_path: str, timeout_seconds: int = 3) -> None:
+        """Initialize the RegexMatcher.
+
+        Args:
+            config_path: Path to the TOML configuration file.
+            timeout_seconds: Timeout for individual regex operations.
+
+        Raises:
+            FileNotFoundError: If config file doesn't exist.
+            ValueError: If config is malformed or contains invalid regex patterns.
+        """
         config = self._load_config(config_path)
         self.keyword_to_patterns = self._extract_keywords_and_patterns(config)
         self.automaton = self._initialize_automaton()
@@ -23,12 +40,20 @@ class RegexMatcher:
 
     @staticmethod
     def _load_config(config_path: str) -> dict[str, Any]:
-        with open(config_path, "rb") as f:
-            return toml.load(f)  # type: ignore[no-any-return]
+        try:
+            with open(config_path, "rb") as f:
+                return toml.load(f)  # type: ignore[no-any-return]
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Configuration file not found: {config_path}") from e
+        except Exception as e:
+            raise ValueError(f"Failed to load configuration from {config_path}: {e}") from e
 
     def _extract_keywords_and_patterns(
         self, config: dict[str, Any]
     ) -> dict[str, list[re.Pattern[str]]]:
+        if "rules" not in config:
+            raise ValueError("Configuration must contain a 'rules' key")
+
         keyword_to_patterns: dict[str, list[re.Pattern[str]]] = {}
         for rule in config["rules"]:
             for keyword in rule.get("keywords", []):
@@ -40,10 +65,13 @@ class RegexMatcher:
         return keyword_to_patterns
 
     def _get_compiled_regex(self, regex: str) -> re.Pattern[str]:
-        if "(?i)" in regex:
-            regex = regex.replace("(?i)", "")
-            return re.compile(regex, re.IGNORECASE)
-        return re.compile(regex)
+        try:
+            if "(?i)" in regex:
+                regex = regex.replace("(?i)", "")
+                return re.compile(regex, re.IGNORECASE)
+            return re.compile(regex)
+        except re.error as e:
+            raise ValueError(f"Invalid regex pattern '{regex}': {e}") from e
 
     def _filter_by_keywords(self, line: str) -> set[re.Pattern[str]]:
         matched_regexes: set[re.Pattern[str]] = set()

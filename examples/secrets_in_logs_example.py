@@ -1,10 +1,10 @@
 """
-This module demonstrates handling secrets in logs with ox_formatter.
+This module demonstrates handling secrets in logs with maskerlogger.
 """
 
 import logging
 
-from masker_formatter import SKIP_MASK, MaskerFormatter
+from maskerlogger import SKIP_MASK, MaskerFormatter
 
 
 def main():
