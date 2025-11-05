@@ -25,6 +25,13 @@ like this:
 This formatter utilizes the standard `logging.Formatter` module.
 Before printing each record to any destination (file, stdout, etc.), it ensures sensitive data is masked with asterisks to prevent leaks.
 
+### Requirements
+
+| MaskerLogger Version | Python Version |
+|---------------------|----------------|
+| 1.0.0+              | 3.10 - 3.13    |
+| < 1.0.0             | 3.9 - 3.13     |
+
 ### Install the library
 
 ```

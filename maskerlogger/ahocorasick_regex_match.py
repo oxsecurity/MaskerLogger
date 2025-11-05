@@ -1,5 +1,5 @@
 import re
-from typing import Any, Optional
+from typing import Any
 
 import ahocorasick
 import tomli as toml
@@ -61,7 +61,7 @@ class RegexMatcher:
                 matches.append(match)
         return matches
 
-    def match_regex_to_line(self, line: str) -> Optional[list[re.Match[str]]]:
+    def match_regex_to_line(self, line: str) -> list[re.Match[str]] | None:
         lower_case_line = line.lower()
         if matched_regxes := self._filter_by_keywords(lower_case_line):
             return self._get_match_regex(line, list(matched_regxes))
