@@ -1,7 +1,9 @@
-import logging
-import pytest
 import json
+import logging
 from io import StringIO
+
+import pytest
+
 from maskerlogger import MaskerFormatter, MaskerFormatterJson
 
 
@@ -13,7 +15,7 @@ def logger_and_log_stream():
     Returns:
         tuple: A logger instance and a StringIO object to capture the log output.
     """
-    logger = logging.getLogger('test_logger')
+    logger = logging.getLogger("test_logger")
     logger.setLevel(logging.DEBUG)
     logger.handlers.clear()
     log_stream = StringIO()

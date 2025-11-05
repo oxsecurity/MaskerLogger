@@ -2,25 +2,20 @@ import logging
 import os
 import re
 from abc import ABC
-from typing import List
 
 from pythonjsonlogger import jsonlogger
 
 from maskerlogger.ahocorasick_regex_match import RegexMatcher
 
-DEFAULT_SECRETS_CONFIG_PATH = os.path.join(
-    os.path.dirname(__file__), "config/gitleaks.toml"
-)
-_APPLY_MASK = 'apply_mask'
+DEFAULT_SECRETS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/gitleaks.toml")
+_APPLY_MASK = "apply_mask"
 SKIP_MASK = {_APPLY_MASK: False}
 
 
-class AbstractMaskedLogger(ABC):
+class AbstractMaskedLogger(ABC):  # noqa B024
     def __init__(
-            self,
-            regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            redact=100
-    ):
+        self, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+    ) -> None:
         """Initializes the AbstractMaskedLogger.
 
         Args:
@@ -37,14 +32,13 @@ class AbstractMaskedLogger(ABC):
 
         return int(redact)
 
-    def _mask_secret(self, msg: str, matches: List[re.Match]) -> str:
+    def _mask_secret(self, msg: str, matches: list[re.Match]) -> str:
         """Masks the sensitive data in the log message."""
         for match in matches:
             match_groups = match.groups() if match.groups() else [match.group()]  # noqa
             for group in match_groups:
                 redact_length = int((len(group) / 100) * self.redact)
-                msg = msg.replace(
-                    group[:redact_length], "*" * redact_length, 1)
+                msg = msg.replace(group[:redact_length], "*" * redact_length, 1)
 
         return msg
 
@@ -57,11 +51,8 @@ class AbstractMaskedLogger(ABC):
 # Normal Masked Logger - Text-Based Log Formatter
 class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
     def __init__(
-            self,
-            fmt: str,
-            regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            redact=100
-    ):
+        self, fmt: str, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+    ) -> None:
         """Initializes the MaskerFormatter.
 
         Args:
@@ -83,11 +74,8 @@ class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
 # JSON Masked Logger - JSON-Based Log Formatter
 class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
     def __init__(
-            self,
-            fmt: str,
-            regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
-            redact=100
-    ):
+        self, fmt: str, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+    ) -> None:
         """Initializes the MaskerFormatterJson.
 
         Args:
@@ -103,4 +91,4 @@ class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
         if getattr(record, _APPLY_MASK, True):
             self._mask_sensitive_data(record)
 
-        return super().format(record)
+        return str(super().format(record))

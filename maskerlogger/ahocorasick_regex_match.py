@@ -1,9 +1,10 @@
-import tomli as toml
 import re
-from typing import List
-import ahocorasick
-from maskerlogger.utils import timeout
+from typing import Any, Optional
 
+import ahocorasick
+import tomli as toml
+
+from maskerlogger.utils import timeout
 
 MAX_MATCH_TIMEOUT = 1
 
@@ -22,44 +23,47 @@ class RegexMatcher:
         return keyword_automaton
 
     @staticmethod
-    def _load_config(config_path: str) -> dict:
-        with open(config_path, 'rb') as f:
-            return toml.load(f)
+    def _load_config(config_path: str) -> dict[str, Any]:
+        with open(config_path, "rb") as f:
+            return toml.load(f)  # type: ignore[no-any-return]
 
-    def _extract_keywords_and_patterns(self, config) -> dict:
-        keyword_to_patterns = {}
-        for rule in config['rules']:
-            for keyword in rule.get('keywords', []):
+    def _extract_keywords_and_patterns(
+        self, config: dict[str, Any]
+    ) -> dict[str, list[re.Pattern[str]]]:
+        keyword_to_patterns: dict[str, list[re.Pattern[str]]] = {}
+        for rule in config["rules"]:
+            for keyword in rule.get("keywords", []):
                 if keyword not in keyword_to_patterns:
                     keyword_to_patterns[keyword] = []
 
-                keyword_to_patterns[keyword].append(self._get_compiled_regex(
-                    rule['regex']))
+                keyword_to_patterns[keyword].append(self._get_compiled_regex(rule["regex"]))
 
         return keyword_to_patterns
 
-    def _get_compiled_regex(self, regex: str) -> str:
-        if '(?i)' in regex:
-            regex = regex.replace('(?i)', '')
+    def _get_compiled_regex(self, regex: str) -> re.Pattern[str]:
+        if "(?i)" in regex:
+            regex = regex.replace("(?i)", "")
             return re.compile(regex, re.IGNORECASE)
         return re.compile(regex)
 
-    def _filter_by_keywords(self, line):
-        matched_regexes = set()
-        for end_index, regex_values in self.automaton.iter(line):
+    def _filter_by_keywords(self, line: str) -> set[re.Pattern[str]]:
+        matched_regexes: set[re.Pattern[str]] = set()
+        for _end_index, regex_values in self.automaton.iter(line):
             matched_regexes.update(regex_values)
         return matched_regexes
 
     @timeout(MAX_MATCH_TIMEOUT)
-    def _get_match_regex(self, line: str,
-                         matched_regex: List[re.Pattern]) -> List[re.Match]:
-        matches = []
+    def _get_match_regex(
+        self, line: str, matched_regex: list[re.Pattern[str]]
+    ) -> list[re.Match[str]]:
+        matches: list[re.Match[str]] = []
         for regex in matched_regex:
             if match := regex.search(line):
                 matches.append(match)
         return matches
 
-    def match_regex_to_line(self, line: str) -> re.Match:
+    def match_regex_to_line(self, line: str) -> Optional[list[re.Match[str]]]:
         lower_case_line = line.lower()
         if matched_regxes := self._filter_by_keywords(lower_case_line):
-            return self._get_match_regex(line, matched_regxes)
+            return self._get_match_regex(line, list(matched_regxes))
+        return None
