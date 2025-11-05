@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "maskerlogger"
-version = "0.4.0-beta.2"
+version = "0.4.0"
 description = "mask your secrets from your logs"
 authors = ["Tamar Galer <tamar@ox.security>"]
 readme = "README.md"
