@@ -28,7 +28,7 @@ class AbstractMaskedLogger(ABC):  # noqa B024
             timeout_seconds (int): Timeout in seconds for regex matching operations.
         """
         self.regex_matcher = RegexMatcher(regex_config_path, timeout_seconds)
-        self.redact = redact
+        self.redact = self._validate_redact(redact)
 
     @staticmethod
     def _validate_redact(redact: int) -> int:

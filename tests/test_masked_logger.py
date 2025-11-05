@@ -179,3 +179,48 @@ def test_masked_logger_handles_timeout_gracefully(logger_and_log_stream, log_for
 
         assert sensitive_msg in log_output
         assert log_output is not None
+
+
+def test_redact_validation_valid_values():
+    """Test that valid redact values (0-100) are accepted."""
+    # Test boundary values
+    MaskerFormatter(fmt="%(message)s", redact=0)
+    MaskerFormatter(fmt="%(message)s", redact=50)
+    MaskerFormatter(fmt="%(message)s", redact=100)
+
+    # Test valid integer values
+    MaskerFormatter(fmt="%(message)s", redact=25)
+    MaskerFormatter(fmt="%(message)s", redact=75)
+
+
+def test_redact_validation_invalid_values():
+    """Test that invalid redact values raise ValueError."""
+    # Test negative values
+    with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
+        MaskerFormatter(fmt="%(message)s", redact=-1)
+
+    with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
+        MaskerFormatter(fmt="%(message)s", redact=-50)
+
+    # Test values greater than 100
+    with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
+        MaskerFormatter(fmt="%(message)s", redact=101)
+
+    with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
+        MaskerFormatter(fmt="%(message)s", redact=150)
+
+
+def test_redact_validation_type_conversion():
+    """Test that string numbers are properly converted to integers."""
+    # Test string representations of valid values
+    formatter = MaskerFormatter(fmt="%(message)s", redact="50")
+    assert formatter.redact == 50
+    assert isinstance(formatter.redact, int)
+
+    formatter = MaskerFormatter(fmt="%(message)s", redact="0")
+    assert formatter.redact == 0
+    assert isinstance(formatter.redact, int)
+
+    # Test invalid string values
+    with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
+        MaskerFormatter(fmt="%(message)s", redact="150")
