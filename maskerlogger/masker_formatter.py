@@ -6,6 +6,7 @@ from abc import ABC
 from pythonjsonlogger import jsonlogger
 
 from maskerlogger.ahocorasick_regex_match import RegexMatcher
+from maskerlogger.utils import TimeoutException
 
 DEFAULT_SECRETS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/gitleaks.toml")
 _APPLY_MASK = "apply_mask"
@@ -44,8 +45,11 @@ class AbstractMaskedLogger(ABC):  # noqa B024
 
     def _mask_sensitive_data(self, record: logging.LogRecord) -> None:
         """Applies masking to the sensitive data in the log message."""
-        if found_matching_regex := self.regex_matcher.match_regex_to_line(record.msg):  # noqa
-            record.msg = self._mask_secret(record.msg, found_matching_regex)
+        try:
+            if found_matching_regex := self.regex_matcher.match_regex_to_line(record.msg):  # noqa
+                record.msg = self._mask_secret(record.msg, found_matching_regex)
+        except TimeoutException:
+            pass
 
 
 # Normal Masked Logger - Text-Based Log Formatter
