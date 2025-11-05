@@ -15,15 +15,19 @@ SKIP_MASK = {_APPLY_MASK: False}
 
 class AbstractMaskedLogger(ABC):  # noqa B024
     def __init__(
-        self, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+        self,
+        regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
+        redact: int = 100,
+        timeout_seconds: int = 3,
     ) -> None:
         """Initializes the AbstractMaskedLogger.
 
         Args:
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
+            timeout_seconds (int): Timeout in seconds for regex matching operations.
         """
-        self.regex_matcher = RegexMatcher(regex_config_path)
+        self.regex_matcher = RegexMatcher(regex_config_path, timeout_seconds)
         self.redact = redact
 
     @staticmethod
@@ -55,7 +59,11 @@ class AbstractMaskedLogger(ABC):  # noqa B024
 # Normal Masked Logger - Text-Based Log Formatter
 class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
     def __init__(
-        self, fmt: str, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+        self,
+        fmt: str,
+        regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
+        redact: int = 100,
+        timeout_seconds: int = 3,
     ) -> None:
         """Initializes the MaskerFormatter.
 
@@ -63,9 +71,10 @@ class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
             fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
+            timeout_seconds (int): Timeout in seconds for regex matching operations.
         """
         logging.Formatter.__init__(self, fmt)
-        AbstractMaskedLogger.__init__(self, regex_config_path, redact)
+        AbstractMaskedLogger.__init__(self, regex_config_path, redact, timeout_seconds)
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as text and applies masking."""
@@ -78,7 +87,11 @@ class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
 # JSON Masked Logger - JSON-Based Log Formatter
 class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
     def __init__(
-        self, fmt: str, regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH, redact: int = 100
+        self,
+        fmt: str,
+        regex_config_path: str = DEFAULT_SECRETS_CONFIG_PATH,
+        redact: int = 100,
+        timeout_seconds: int = 3,
     ) -> None:
         """Initializes the MaskerFormatterJson.
 
@@ -86,9 +99,10 @@ class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
             fmt (str): Format string for the logger.
             regex_config_path (str): Path to the configuration file for regex patterns.
             redact (int): Percentage of the sensitive data to redact.
+            timeout_seconds (int): Timeout in seconds for regex matching operations.
         """
         jsonlogger.JsonFormatter.__init__(self, fmt)
-        AbstractMaskedLogger.__init__(self, regex_config_path, redact)
+        AbstractMaskedLogger.__init__(self, regex_config_path, redact, timeout_seconds)
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as JSON and applies masking."""

@@ -6,14 +6,13 @@ import tomli as toml
 
 from maskerlogger.utils import timeout
 
-MAX_MATCH_TIMEOUT = 1
-
 
 class RegexMatcher:
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_path: str, timeout_seconds: int = 3) -> None:
         config = self._load_config(config_path)
         self.keyword_to_patterns = self._extract_keywords_and_patterns(config)
         self.automaton = self._initialize_automaton()
+        self.timeout_seconds = timeout_seconds
 
     def _initialize_automaton(self) -> ahocorasick.Automaton:
         keyword_automaton = ahocorasick.Automaton()
@@ -52,7 +51,7 @@ class RegexMatcher:
             matched_regexes.update(regex_values)
         return matched_regexes
 
-    @timeout(MAX_MATCH_TIMEOUT)
+    @timeout(lambda self, *args, **kwargs: self.timeout_seconds)
     def _get_match_regex(
         self, line: str, matched_regex: list[re.Pattern[str]]
     ) -> list[re.Match[str]]:
