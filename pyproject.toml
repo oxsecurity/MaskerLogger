@@ -1,24 +1,97 @@
-[tool.poetry]
+[project]
 name = "maskerlogger"
-version = "0.4.0"
+version = "1.0.0"
 description = "mask your secrets from your logs"
-authors = ["Tamar Galer <tamar@ox.security>"]
+authors = [
+    {name = "Tamar Galer", email = "tamar@ox.security"},
+    {name = "Aviad Levy", email = "aviad@ox.security"}
+]
 readme = "README.md"
-packages = [{include = "maskerlogger"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Logging",
+]
+dependencies = [
+    "pyahocorasick>=2.1.0,<3.0.0",
+    "python-json-logger>=2.0.7,<4.0.0",
+    "tomli>=2.0.0,<3.0.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-pyahocorasick = "^2.1.0"
-python-json-logger = "^2.0.7"
-tomli = ">=2.0.0,<3.0.0"
+[project.urls]
+Source = "https://github.com/oxsecurity/MaskerLogger"
+Tracker = "https://github.com/oxsecurity/MaskerLogger/issues"
+
+[tool.poetry]
+packages = [{include = "maskerlogger"}]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-
-[tool.poetry.urls]
-Source = "https://github.com/oxsecurity/MaskerLogger"
-Tracker = "https://github.com/oxsecurity/MaskerLogger/issues"
+pytest-cov = "^4.1.0"
+ruff = "^0.1.0"
+pre-commit = "^3.5.0"
+mypy = "^1.7.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.coverage.run]
+source = ["maskerlogger"]
+omit = ["tests/*", "*/secrets_in_logs_example.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+ignore_missing_imports = true

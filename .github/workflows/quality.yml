@@ -1,0 +1,61 @@
+name: Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  file-checks:
+    name: File Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run file quality checks
+        run: |
+          # Run only the pre-commit-hooks (file checks)
+          pre-commit run --all-files trailing-whitespace
+          pre-commit run --all-files end-of-file-fixer
+          pre-commit run --all-files check-yaml
+          pre-commit run --all-files check-toml
+          pre-commit run --all-files check-added-large-files
+          pre-commit run --all-files check-merge-conflict
+          pre-commit run --all-files check-case-conflict
+          pre-commit run --all-files detect-private-key
+          pre-commit run --all-files mixed-line-ending
+
+  poetry-validation:
+    name: Poetry Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Validate Poetry configuration
+        run: poetry check
+
+      - name: Verify lock file is up to date
+        run: poetry check --lock
