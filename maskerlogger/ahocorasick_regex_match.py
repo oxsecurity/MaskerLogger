@@ -6,6 +6,10 @@ import tomli as toml
 
 from maskerlogger.utils import timeout
 
+RULES_KEY = "rules"
+KEYWORDS_KEY = "keywords"
+REGEX_KEY = "regex"
+
 
 class RegexMatcher:
     """Efficient regex matcher using Aho-Corasick algorithm for keyword detection.
@@ -51,16 +55,16 @@ class RegexMatcher:
     def _extract_keywords_and_patterns(
         self, config: dict[str, Any]
     ) -> dict[str, list[re.Pattern[str]]]:
-        if "rules" not in config:
-            raise ValueError("Configuration must contain a 'rules' key")
+        if RULES_KEY not in config:
+            raise ValueError(f"Configuration must contain a '{RULES_KEY}' key")
 
         keyword_to_patterns: dict[str, list[re.Pattern[str]]] = {}
-        for rule in config["rules"]:
-            for keyword in rule.get("keywords", []):
+        for rule in config[RULES_KEY]:
+            for keyword in rule.get(KEYWORDS_KEY, []):
                 if keyword not in keyword_to_patterns:
                     keyword_to_patterns[keyword] = []
 
-                keyword_to_patterns[keyword].append(self._get_compiled_regex(rule["regex"]))
+                keyword_to_patterns[keyword].append(self._get_compiled_regex(rule[REGEX_KEY]))
 
         return keyword_to_patterns
 
