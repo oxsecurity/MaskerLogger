@@ -38,7 +38,7 @@ packages = [{include = "maskerlogger"}]
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
 pytest-cov = "^7.0.0"
-ruff = "^0.1.0"
+ruff = "^0.14.4"
 pre-commit = "^3.5.0"
 mypy = "^1.7.0"
 
