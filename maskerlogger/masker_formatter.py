@@ -3,7 +3,10 @@ import os
 import re
 from abc import ABC
 
-from pythonjsonlogger import jsonlogger
+try:
+    from pythonjsonlogger import json as jsonlogger
+except ImportError:
+    from pythonjsonlogger import jsonlogger
 
 from maskerlogger.ahocorasick_regex_match import RegexMatcher
 from maskerlogger.utils import TimeoutException
