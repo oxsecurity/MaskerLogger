@@ -42,7 +42,7 @@ jobs:
         if: matrix.python-version == '3.10'
         uses: codecov/codecov-action@v5
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml  # Changed from 'file' to 'files'
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
