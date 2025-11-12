@@ -68,12 +68,24 @@ class RegexMatcher:
 
         return keyword_to_patterns
 
+    def safe_compile(self, pattern: str, flags: int = 0) -> re.Pattern[str]:
+        """
+        Safely compile Gitleaks (Go-style) regex for Python.
+        Handles bad escapes like \\z.
+        Preserves valid Python regex anchors like \\A, \\Z.
+        Preserves regex escape sequences like \b, \\w, \\d, etc.
+        """
+        # Replace PCRE/Go-only tokens with Python equivalents
+        pattern = pattern.replace(r"\z", r"\Z")
+
+        return re.compile(pattern, flags)
+
     def _get_compiled_regex(self, regex: str) -> re.Pattern[str]:
         try:
             if "(?i)" in regex:
                 regex = regex.replace("(?i)", "")
-                return re.compile(regex, re.IGNORECASE)
-            return re.compile(regex)
+                return self.safe_compile(regex, re.IGNORECASE)
+            return self.safe_compile(regex)
         except re.error as e:
             raise ValueError(f"Invalid regex pattern '{regex}': {e}") from e
 
