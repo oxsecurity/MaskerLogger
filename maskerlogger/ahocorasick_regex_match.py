@@ -71,12 +71,12 @@ class RegexMatcher:
     def safe_compile(self, pattern: str, flags: int = 0) -> re.Pattern[str]:
         """
         Safely compile Gitleaks (Go-style) regex for Python.
-        Handles bad escapes like \\z, \\A, etc.
+        Handles bad escapes like \\z.
+        Preserves valid Python regex anchors like \\A, \\Z.
         Preserves regex escape sequences like \b, \\w, \\d, etc.
         """
         # Replace PCRE/Go-only tokens with Python equivalents
         pattern = pattern.replace(r"\z", r"\Z")
-        pattern = pattern.replace(r"\A", r"^")
 
         return re.compile(pattern, flags)
 
