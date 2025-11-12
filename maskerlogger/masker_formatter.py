@@ -59,16 +59,38 @@ class AbstractMaskedLogger(ABC):  # noqa B024
 
     def _mask_secret(self, msg: str, matches: list[re.Match]) -> str:
         """Masks the sensitive data in the log message."""
+        if not matches:
+            return msg
+
+        # Create a list of (start, end, replacement) tuples for all parts to be masked
+        replacements = []
+
         for match in matches:
-            match_groups = list(match.groups()) if match.groups() else [match.group()]
-            for group in match_groups:
-                if not group:  # Skip empty groups
-                    continue
-                redact_length = int((len(group) / 100) * self.redact)
-                if redact_length > 0:
-                    # Replace only the beginning of the group with asterisks
-                    masked_part = "*" * redact_length + group[redact_length:]
-                    msg = msg.replace(group, masked_part, 1)
+            if match.groups():
+                # Handle matches with groups - mask each group separately
+                for i, group in enumerate(match.groups(), 1):
+                    if group:  # Skip empty groups
+                        group_start = match.start(i)
+                        group_end = match.end(i)
+                        redact_length = int((len(group) / 100) * self.redact)
+                        if redact_length > 0:
+                            masked_part = "*" * redact_length + group[redact_length:]
+                            replacements.append((group_start, group_end, masked_part))
+            else:
+                # Handle matches without groups - mask the entire match
+                full_match = match.group()
+                if full_match:
+                    redact_length = int((len(full_match) / 100) * self.redact)
+                    if redact_length > 0:
+                        masked_part = "*" * redact_length + full_match[redact_length:]
+                        replacements.append((match.start(), match.end(), masked_part))
+
+        # Sort replacements by start position in reverse order to avoid position shifts
+        replacements.sort(key=lambda x: x[0], reverse=True)
+
+        # Apply replacements from right to left to preserve positions
+        for start, end, replacement in replacements:
+            msg = msg[:start] + replacement + msg[end:]
 
         return msg
 

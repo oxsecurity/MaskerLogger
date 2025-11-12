@@ -224,3 +224,64 @@ def test_redact_validation_type_conversion():
     # Test invalid string values
     with pytest.raises(ValueError, match="Redact value must be between 0 and 100"):
         MaskerFormatter(fmt="%(message)s", redact="150")
+
+
+def test_masked_logger_multiple_leaks_same_string(logger_and_log_stream, log_format):
+    """
+    Test that multiple occurrences of the same leak in a single string are all masked.
+    This verifies the fix for catching more than 1 leak in the same string.
+
+    Args:
+        logger_and_log_stream (tuple): A tuple containing the logger and log stream.
+    """
+    logger, log_stream = logger_and_log_stream
+
+    # Set the MaskerFormatter formatter
+    formatter = MaskerFormatter(fmt=log_format)
+    logger.handlers[0].setFormatter(formatter)
+
+    # Log a message with multiple instances of the same secret (using 10+ char passwords)
+    logger.info(
+        "First password=secretpassword and second password=anothersecret and third password=secretpassword"
+    )
+
+    # Read and parse the log output
+    log_output = log_stream.getvalue().strip()
+
+    # Validate that all password instances are masked
+    assert "password=" in log_output
+    assert "secretpassword" not in log_output
+    assert "anothersecret" not in log_output
+
+    # Count the number of password= occurrences to ensure all are processed
+    password_count = log_output.count("password=")
+    assert password_count == 3, f"Expected 3 password fields, found {password_count}"
+
+
+def test_masked_logger_multiple_different_leaks_same_string(logger_and_log_stream, log_format):
+    """
+    Test that multiple different types of leaks in a single string are all masked.
+
+    Args:
+        logger_and_log_stream (tuple): A tuple containing the logger and log stream.
+    """
+    logger, log_stream = logger_and_log_stream
+
+    # Set the MaskerFormatter formatter
+    formatter = MaskerFormatter(fmt=log_format)
+    logger.handlers[0].setFormatter(formatter)
+
+    # Log a message with multiple different sensitive patterns (using 10+ char secrets)
+    logger.info(
+        "User data: password=mysecretpassword and token=abc123tokenlong and password=anothersecret"
+    )
+
+    # Read and parse the log output
+    log_output = log_stream.getvalue().strip()
+
+    # Validate that both password instances and token are masked
+    assert "password=" in log_output
+    assert "token=" in log_output
+    assert "mysecretpassword" not in log_output
+    assert "anothersecret" not in log_output
+    assert "abc123tokenlong" not in log_output
