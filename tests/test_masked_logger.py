@@ -285,3 +285,60 @@ def test_masked_logger_multiple_different_leaks_same_string(logger_and_log_strea
     assert "mysecretpassword" not in log_output
     assert "anothersecret" not in log_output
     assert "abc123tokenlong" not in log_output
+
+
+def test_masked_logger_overlapping_matches(logger_and_log_stream, log_format):
+    """
+    Test that overlapping matches from different regex patterns are handled correctly.
+    This verifies that the character-array approach properly handles complex scenarios
+    where multiple patterns might match overlapping text spans.
+
+    Args:
+        logger_and_log_stream (tuple): A tuple containing the logger and log stream.
+    """
+    logger, log_stream = logger_and_log_stream
+
+    # Set the MaskerFormatter formatter
+    formatter = MaskerFormatter(fmt=log_format)
+    logger.handlers[0].setFormatter(formatter)
+
+    # Log a message that might trigger overlapping regex patterns
+    logger.info("Auth data: token=secrettoken123456 and password=overlappingsecretkey")
+
+    # Read and parse the log output
+    log_output = log_stream.getvalue().strip()
+
+    # Validate that all sensitive data is masked, even with potential overlaps
+    assert "secrettoken123456" not in log_output
+    assert "overlappingsecretkey" not in log_output
+    # Note: Different patterns capture differently - some include key=, others don't
+    # The important thing is that the secret values are masked
+    assert "password=" in log_output  # This pattern captures only the value
+
+
+def test_masked_logger_empty_capture_groups(logger_and_log_stream, log_format):
+    """
+    Test that patterns with capture groups that are all None/empty still get masked.
+    This verifies the fix for the edge case where regex patterns have optional groups
+    that don't match, leaving all capture groups as None/empty.
+
+    Args:
+        logger_and_log_stream (tuple): A tuple containing the logger and log stream.
+    """
+    logger, log_stream = logger_and_log_stream
+
+    # Set the MaskerFormatter formatter
+    formatter = MaskerFormatter(fmt=log_format)
+    logger.handlers[0].setFormatter(formatter)
+
+    # Create a scenario that might result in None capture groups
+    # This could happen with complex regex patterns that have optional groups
+    logger.info("API key: AKIAIOSFODNN7EXAMPLE")  # AWS access key pattern
+
+    # Read and parse the log output
+    log_output = log_stream.getvalue().strip()
+
+    # The key should be masked even if capture groups are None/empty
+    assert "AKIAIOSFODNN7EXAMPLE" not in log_output
+    # Some part of the message should be masked (asterisks should appear)
+    assert "*" in log_output
