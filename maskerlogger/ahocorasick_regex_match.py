@@ -101,8 +101,7 @@ class RegexMatcher:
     ) -> list[re.Match[str]]:
         matches: list[re.Match[str]] = []
         for regex in matched_regex:
-            if match := regex.search(line):
-                matches.append(match)
+            matches.extend(regex.finditer(line))
         return matches
 
     def match_regex_to_line(self, line: str) -> list[re.Match[str]] | None:

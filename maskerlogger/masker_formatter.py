@@ -59,18 +59,53 @@ class AbstractMaskedLogger(ABC):  # noqa B024
 
     def _mask_secret(self, msg: str, matches: list[re.Match]) -> str:
         """Masks the sensitive data in the log message."""
-        for match in matches:
-            match_groups = list(match.groups()) if match.groups() else [match.group()]
-            for group in match_groups:
-                if not group:  # Skip empty groups
-                    continue
-                redact_length = int((len(group) / 100) * self.redact)
-                if redact_length > 0:
-                    # Replace only the beginning of the group with asterisks
-                    masked_part = "*" * redact_length + group[redact_length:]
-                    msg = msg.replace(group, masked_part, 1)
+        if not matches:
+            return msg
 
-        return msg
+        # Create a character array to track which positions should be masked
+        # Each element will be True if that character should be masked
+        mask_positions = [False] * len(msg)
+
+        # Process all matches and mark positions for masking
+        for match in matches:
+            masked_something = False
+
+            # If there are capture groups, try to process each group (starting from 1)
+            if match.groups():
+                for group_index in range(1, len(match.groups()) + 1):
+                    group = match.group(group_index)
+                    if group:  # Process non-empty groups
+                        group_start = match.start(group_index)
+                        group_end = match.end(group_index)
+                        redact_length = int((len(group) / 100) * self.redact)
+
+                        # Mark positions for masking (only the first redact_length characters)
+                        for pos in range(group_start, min(group_start + redact_length, group_end)):
+                            mask_positions[pos] = True
+                        masked_something = True
+
+            # If no capture groups exist, or all capture groups were None/empty,
+            # fall back to masking the entire match (group 0)
+            if not masked_something:
+                full_match = match.group(0)
+                if full_match:
+                    group_start = match.start(0)
+                    group_end = match.end(0)
+                    redact_length = int((len(full_match) / 100) * self.redact)
+
+                    # Mark positions for masking (only the first redact_length characters)
+                    for pos in range(group_start, min(group_start + redact_length, group_end)):
+                        mask_positions[pos] = True
+
+        # Build the masked string by replacing marked positions with asterisks
+        result = []
+        for i, char in enumerate(msg):
+            if mask_positions[i]:
+                result.append("*")
+            else:
+                result.append(char)
+
+        return "".join(result)
 
     def _mask_sensitive_data(self, record: logging.LogRecord) -> None:
         """Applies masking to the sensitive data in the log message."""
