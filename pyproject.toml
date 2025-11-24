@@ -39,7 +39,7 @@ packages = [{include = "maskerlogger"}]
 pytest = "^9.0.0"
 pytest-cov = "^7.0.0"
 ruff = "^0.14.4"
-pre-commit = "^4.4.0"
+pre-commit = "^4.5.0"
 mypy = "^1.7.0"
 
 [build-system]
