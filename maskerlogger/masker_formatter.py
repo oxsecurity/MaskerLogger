@@ -115,15 +115,16 @@ class AbstractMaskedLogger(ABC):  # noqa B024
                 record.msg = self._mask_secret(record.msg, found_matching_regex)
 
             # Mask exc_text if present
-            if hasattr(record, 'exc_text') and record.exc_text:
+            if hasattr(record, "exc_text") and record.exc_text:
                 if found_matching_regex := self.regex_matcher.match_regex_to_line(record.exc_text):
                     record.exc_text = self._mask_secret(record.exc_text, found_matching_regex)
 
             # Mask exc_info (traceback) if present and exc_text not present
-            elif hasattr(record, 'exc_info') and record.exc_info:
+            elif hasattr(record, "exc_info") and record.exc_info:
                 import traceback
+
                 exc_type, exc_value, exc_tb = record.exc_info
-                tb_str = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
+                tb_str = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
                 if found_matching_regex := self.regex_matcher.match_regex_to_line(tb_str):
                     masked_tb_str = self._mask_secret(tb_str, found_matching_regex)
                     record.exc_text = masked_tb_str  # exc_text is used by logging.Formatter
@@ -186,10 +187,10 @@ class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
 
         return str(super().format(record))
 
-    def formatException(self, exc_info):
+    def formatException(self, exc_info: tuple[type, BaseException, object]) -> str:
         # Get the formatted exception string from the base class
         formatted = super().formatException(exc_info)
         # Mask sensitive data in the formatted exception string
         if found_matching_regex := self.regex_matcher.match_regex_to_line(formatted):
             return self._mask_secret(formatted, found_matching_regex)
-        return formatted
+        return str(formatted)

@@ -512,7 +512,7 @@ def test_masked_logger_masks_secrets_in_traceback_text(logger_and_log_stream, lo
 
     log_output = log_stream.getvalue()
     # The secret should be masked in the traceback
-    assert f"password=" in log_output
+    assert "password=" in log_output
     assert secret not in log_output
     assert "*****" in log_output
 
@@ -534,6 +534,6 @@ def test_masked_logger_masks_secrets_in_traceback_json(logger_and_log_stream, lo
     log_output = log_stream.getvalue()
     log_json = json.loads(log_output)
     # The secret should be masked in the traceback (exc_info field)
-    assert f"password=" in log_json.get("exc_info", "")
+    assert "password=" in log_json.get("exc_info", "")
     assert secret not in log_json.get("exc_info", "")
     assert "*****" in log_json.get("exc_info", "")
