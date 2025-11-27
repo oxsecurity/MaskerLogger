@@ -108,28 +108,13 @@ class AbstractMaskedLogger(ABC):  # noqa B024
         return "".join(result)
 
     def _mask_sensitive_data(self, record: logging.LogRecord) -> None:
-        """Applies masking to the sensitive data in the log message and traceback."""
+        """Applies masking to the sensitive data in the log message."""
         try:
-            # Mask the main log message
-            if found_matching_regex := self.regex_matcher.match_regex_to_line(record.msg):
+            if found_matching_regex := self.regex_matcher.match_regex_to_line(record.msg):  # noqa
                 record.msg = self._mask_secret(record.msg, found_matching_regex)
 
-            # Mask exc_text if present
-            if hasattr(record, 'exc_text') and record.exc_text:
-                if found_matching_regex := self.regex_matcher.match_regex_to_line(record.exc_text):
-                    record.exc_text = self._mask_secret(record.exc_text, found_matching_regex)
-
-            # Mask exc_info (traceback) if present and exc_text not present
-            elif hasattr(record, 'exc_info') and record.exc_info:
-                import traceback
-                exc_type, exc_value, exc_tb = record.exc_info
-                tb_str = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
-                if found_matching_regex := self.regex_matcher.match_regex_to_line(tb_str):
-                    masked_tb_str = self._mask_secret(tb_str, found_matching_regex)
-                    record.exc_text = masked_tb_str  # exc_text is used by logging.Formatter
         except TimeoutException:
             pass
-
 
 # Normal Masked Logger - Text-Based Log Formatter
 class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
@@ -153,10 +138,17 @@ class MaskerFormatter(logging.Formatter, AbstractMaskedLogger):
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as text and applies masking."""
-        if getattr(record, _APPLY_MASK, True):
-            self._mask_sensitive_data(record)
+        # Format the record using the parent formatter first
+        formatted = super().format(record)
 
-        return super().format(record)
+        if getattr(record, _APPLY_MASK, True):
+            try:
+                if found_matching_regex := self.regex_matcher.match_regex_to_line(formatted):
+                    formatted = self._mask_secret(formatted, found_matching_regex)
+            except TimeoutException:
+                pass
+
+        return formatted
 
 
 # JSON Masked Logger - JSON-Based Log Formatter
@@ -181,15 +173,14 @@ class MaskerFormatterJson(jsonlogger.JsonFormatter, AbstractMaskedLogger):
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the log record as JSON and applies masking."""
+        # Format the record using the parent formatter first
+        formatted = str(super().format(record))
+
         if getattr(record, _APPLY_MASK, True):
-            self._mask_sensitive_data(record)
+            try:
+                if found_matching_regex := self.regex_matcher.match_regex_to_line(formatted):
+                    formatted = self._mask_secret(formatted, found_matching_regex)
+            except TimeoutException:
+                pass
 
-        return str(super().format(record))
-
-    def formatException(self, exc_info):
-        # Get the formatted exception string from the base class
-        formatted = super().formatException(exc_info)
-        # Mask sensitive data in the formatted exception string
-        if found_matching_regex := self.regex_matcher.match_regex_to_line(formatted):
-            return self._mask_secret(formatted, found_matching_regex)
         return formatted
